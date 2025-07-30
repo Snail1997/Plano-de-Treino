@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Treino Interativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Slate, Stone, Sky) -->
+    <!-- Application Structure Plan: A tab-based SPA. Main navigation switches between daily workouts (Quarta-Domingo) and a 'Visão Geral' tab. This structure is chosen for task-focused usability, allowing the user to view only the relevant workout for the current day without scrolling through other days. The 'Visão Geral' tab uses an accordion for general notes, diet, and supplements, keeping non-essential daily info organized and accessible but out of the way. -->
+    <!-- Visualization & Content Choices: Report Info: Daily exercises with tips -> Goal: Present daily tasks clearly -> Method: Interactive cards for each exercise. Interaction: A 'Detalhes' button on each card toggles the visibility of specific tips (progressive disclosure) to keep the UI clean. Report Info: General guidelines (nutrition, supplements) -> Goal: Organize supplementary info -> Method: Accordion component. Interaction: Clicking a header expands its content. Justification: This interactive text-based approach is optimal as the source report contains no quantitative data suitable for charting. Library/Method: Vanilla JS and Tailwind CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #0284c7;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            overflow-y: auto; /* Adicionado para permitir rolagem vertical se o conteúdo exceder o max-height */
+        }
+        .details-content.open {
+            max-height: 1200px; /* Aumentado para dar mais espaço aos GIFs */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .accordion-content.open {
+            max-height: 1000px;
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-button.open .accordion-icon {
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="min-h-screen container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-sky-800">Plano de Treino Interativo</h1>
+            <p class="mt-2 text-lg text-slate-600">Seu guia para perda de gordura e manutenção muscular.</p>
+        </header>
+
+        <nav class="mb-8">
+            <div id="nav-container" class="flex flex-wrap justify-center gap-2 sm:gap-3">
+                <button data-target="overview" class="nav-button active text-sm sm:text-base font-semibold py-2 px-4 rounded-full bg-white text-sky-700 shadow-sm hover:bg-sky-100">Visão Geral</button>
+                <button data-target="wednesday" class="nav-button text-sm sm:text-base font-semibold py-2 px-4 rounded-full bg-white text-sky-700 shadow-sm hover:bg-sky-100">Quarta</button>
+                <button data-target="thursday" class="nav-button text-sm sm:text-base font-semibold py-2 px-4 rounded-full bg-white text-sky-700 shadow-sm hover:bg-sky-100">Quinta</button>
+                <button data-target="friday" class="nav-button text-sm sm:text-base font-semibold py-2 px-4 rounded-full bg-white text-sky-700 shadow-sm hover:bg-sky-100">Sexta</button>
+                <button data-target="saturday" class="nav-button text-sm sm:text-base font-semibold py-2 px-4 rounded-full bg-white text-sky-700 shadow-sm hover:bg-sky-100">Sábado</button>
+                <button data-target="sunday" class="nav-button text-sm sm:text-base font-semibold py-2 px-4 rounded-full bg-white text-sky-700 shadow-sm hover:bg-sky-100">Domingo</button>
+            </div>
+        </nav>
+
+        <main id="main-content">
+            <!-- Overview Section -->
+            <section id="overview" class="content-section active">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold text-sky-700 mb-4">Visão Geral e Recomendações</h2>
+                    <p class="text-slate-600 mb-6">Esta seção contém todas as informações e diretrizes essenciais que apoiam seu plano de treino. Consulte-a para entender os princípios de aquecimento, progressão, nutrição e suplementação que garantirão seus resultados com segurança.</p>
+                    <div id="accordion-container" class="space-y-3">
+                        <!-- Accordion Item 1 -->
+                        <div class="border border-slate-200 rounded-lg">
+                            <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-slate-100 hover:bg-slate-200 transition">
+                                <span class="font-semibold text-lg text-slate-700">Observações Importantes</span>
+                                <span class="accordion-icon text-sky-600 text-2xl font-light">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-4 text-slate-600 space-y-2">
+                                    <p><strong>Aquecimento:</strong> Sempre realize um aquecimento de 5-10 minutos antes de cada treino de força (caminhada leve, alongamentos dinâmicos).</p>
+                                    <p><strong>Atenção ao Ombro:</strong> Mantenha a forma perfeita e não force se sentir qualquer desconforto ou dor. Se um exercício específico causar dor, substitua-o.</p>
+                                    <p><strong>Controle o Movimento:</strong> Não use o impulso para levantar o peso. Realize cada repetição de forma controlada.</p>
+                                    <p><strong>Progressão de Carga:</strong> Se conseguir fazer todas as repetições com facilidade, aumente a carga na próxima sessão. O aumento deve ser pequeno, o suficiente para que as últimas repetições se tornem desafiadoras.</p>
+                                    <p><strong>Percepção de Esforço (RPE):</strong> Para a maioria dos exercícios, você deve sentir que está em um RPE de 7-8 (em uma escala de 10).</p>
+                                    <p><strong>Descanso entre as Séries:</strong> Descanse entre 60 e 90 segundos entre as séries.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Accordion Item 2 -->
+                        <div class="border border-slate-200 rounded-lg">
+                            <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-slate-100 hover:bg-slate-200 transition">
+                                <span class="font-semibold text-lg text-slate-700">Cardio e Alimentação</span>
+                                <span class="accordion-icon text-sky-600 text-2xl font-light">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-4 text-slate-600 space-y-2">
+                                    <p><strong>Cardio em Casa (Dança):</strong> Mantenha 1 hora de dança em casa todos os dias de treino (Quarta a Domingo). Esta é uma excelente forma de complementar a queima calórica.</p>
+                                    <p><strong>Alimentação:</strong> A perda de gordura é impulsionada por um déficit calórico. Consuma cerca de 300-500 calorias a menos do que seu gasto diário.</p>
+                                    <p><strong>Foque em:</strong> Proteínas (ovos, frango), Carboidratos Complexos (arroz integral, batata doce), Gorduras Saudáveis (abacate, azeite) e muitos Vegetais e Frutas.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Accordion Item 3 -->
+                        <div class="border border-slate-200 rounded-lg">
+                            <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-slate-100 hover:bg-slate-200 transition">
+                                <span class="font-semibold text-lg text-slate-700">Suplementação (Orçamento ~R$250)</span>
+                                <span class="accordion-icon text-sky-600 text-2xl font-light">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-4 text-slate-600 space-y-4">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800">1. Whey Protein (Pós-treino)</h4>
+                                        <p>Ideal para a recuperação muscular. Ajuda a atingir sua meta diária de proteínas, crucial para manter a massa muscular em déficit calórico.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800">2. Creatina</h4>
+                                        <p>Altamente recomendada. Auxilia no aumento da força e potência, permitindo treinos mais intensos, o que indiretamente ajuda na queima calórica.</p>
+                                    </div>
+                                     <p class="italic"><strong>Nota:</strong> Nenhum pré-treino estimulante é indicado devido à sua sensibilidade. Foque em uma boa refeição pré-treino.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Workout Sections -->
+            <div id="workout-sections"></div>
+
+        </main>
+    </div>
+
+    <script>
+        const workoutData = {
+            wednesday: {
+                title: "Treino A: Peito & Tríceps",
+                description: "O treino de hoje foca no desenvolvimento da força e volume para os músculos do peito e tríceps. Mantenha a concentração na contração muscular e na execução correta para maximizar os resultados e proteger suas articulações.",
+                exercises: [
+                    { name: "Supino Inclinado com Halteres", reps: "3 séries de 10-12", details: "Ajuste o banco para uma inclinação moderada. Mantenha os cotovelos ligeiramente para dentro e não desça os halteres abaixo da linha do ombro se sentir desconforto.", imageUrl: "dumbbell-incline-bench-press.gif" },
+                    { name: "Peck Deck (Voador Peitoral)", reps: "3 séries de 12-15", details: "Ajuste a máquina para que seus ombros fiquem confortáveis. Concentre-se em espremer os peitorais no final do movimento.", imageUrl: "voador-no-aparelho.gif" },
+                    { name: "Crossover (Polia Alta)", reps: "3 séries de 12-15", details: "Posicione as polias na altura dos ombros ou um pouco acima. Dê um passo à frente. Leve as mãos em direção ao centro do corpo, sentindo a contração peitoral.", imageUrl: "Crossover-polia-alta.gif" },
+                    { name: "Tríceps Pulley (Corda)", reps: "3 séries de 12-15", details: "Mantenha os cotovelos fixos e próximos ao corpo. Estenda a corda para baixo, contraindo o tríceps.", imageUrl: "triceps-corda.gif" },
+                    { name: "Tríceps Testa com Halteres", reps: "3 séries de 10-12", details: "Deite-se no banco, segure os halteres acima da cabeça e dobre os cotovelos, levando os halteres em direção à testa.", imageUrl: "dumbbell-lying-triceps-extension.gif" },
+                    { name: "Tríceps Coice Unilateral (Polia Baixa)", reps: "3 séries de 12-15", details: "Incline o tronco ligeiramente à frente, apoie a mão livre para equilíbrio. Estenda o braço para trás, sentindo o tríceps.", imageUrl: "9892c95fc5fb18b8a461612697ce5001.gif" }
+                ]
+            },
+            thursday: {
+                title: "Treino B: Costas & Bíceps",
+                description: "Este treino visa fortalecer e aumentar a musculatura das costas e bíceps. O foco é em movimentos de puxada, essenciais para uma boa postura e um tronco forte. Controle cada repetição para sentir o músculo-alvo trabalhando.",
+                exercises: [
+                    { name: "Puxada Alta com Pegada Neutra", reps: "3 séries de 10-12", details: "Use a barra com pegada neutra. Puxe em direção ao peito, focando na contração das costas e na aproximação das escápulas." },
+                    { name: "Remada Sentada (com Triângulo)", reps: "3 séries de 10-12", details: "Mantenha a coluna reta. Puxe o triângulo em direção ao abdômen, espremendo as escápulas." },
+                    { name: "Remada Cavalinho", reps: "3 séries de 10-12", details: "Posicione a barra com anilhas no chão. Incline o tronco à frente, mantendo a coluna reta e puxe a barra em direção ao abdômen." },
+                    { name: "Rosca Direta com Barra (W ou Reta)", reps: "3 séries de 10-12", details: "Mantenha os cotovelos fixos ao lado do corpo. Não balance o tronco." },
+                    { name: "Rosca Alternada com Halteres", reps: "3 séries de 10-12", details: "Sente-se em um banco, alterne a elevação dos halteres, girando o punho (supinação) ao subir." },
+                    { name: "Rosca Martelo com Halteres", reps: "3 séries de 12-15", details: "Mantenha as palmas das mãos viradas uma para a outra durante todo o movimento." }
+                ]
+            },
+            friday: {
+                title: "Treino C: Ombro & Core",
+                description: "Sexta-feira é dia de focar na segurança e fortalecimento dos ombros e do core. Os exercícios foram escolhidos para minimizar o estresse na articulação do ombro, enquanto o trabalho de core fortalece a base do seu corpo.",
+                exercises: [
+                    { name: "Elevação Lateral na Polia", reps: "3 séries de 12-15", details: "Posicione a polia na altura do tornozelo. Fique de lado e eleve o braço lateralmente, controladamente, até a altura do ombro. Comece com peso leve." },
+                    { name: "Elevação Frontal na Polia", reps: "3 séries de 12-15", details: "Posicione a polia na altura do tornozelo. Fique de costas e eleve o braço para a frente, controladamente, até a altura do ombro. Comece com peso leve." },
+                    { name: "Desenvolvimento na Máquina Smith", reps: "3 séries de 10-12", details: "A máquina Smith oferece estabilidade. Sente-se, ajuste a barra na altura do queixo. Não desça a barra abaixo da linha do ombro se sentir desconforto." },
+                    { name: "Encolhimento com Halteres", reps: "3 séries de 15-20", details: "Mantenha os braços esticados e eleve os ombros em direção às orelhas, contraindo o trapézio." },
+                    { name: "Prancha Abdominal", reps: "3 séries de 30-60s", details: "Mantenha o corpo reto, contraia o abdômen e o glúteo." },
+                    { name: "Rotação de Tronco no Cross Over", reps: "3 séries de 15-20", details: "Posicione a polia na altura do ombro. Segure o cabo com as duas mãos e gire o tronco, mantendo os braços estendidos." },
+                    { name: "Abdominal no Solo", reps: "3 séries de 15-20", details: "Realize o movimento de forma controlada, focando na contração do abdômen." }
+                ]
+            },
+            saturday: {
+                title: "Treino A': Peito & Tríceps",
+                description: "No segundo treino de peito e tríceps da semana, usamos variações para estimular os músculos de ângulos diferentes. O foco continua na técnica perfeita e na conexão mente-músculo para um desenvolvimento completo.",
+                exercises: [
+                    { name: "Supino Reto com Halteres", reps: "3 séries de 10-12", details: "Controle o movimento, especialmente na descida. Mantenha os pés firmes no chão para maior estabilidade." },
+                    { name: "Crossover (Polia Média/Baixa)", reps: "3 séries de 12-15", details: "Este ângulo trabalha a porção inferior e central do peitoral. Foque em 'espremer' o músculo no final do movimento." },
+                    { name: "Flexões", reps: "3 séries até a falha", details: "Faça no chão ou com joelhos apoiados. Mantenha o corpo reto e desça o peito até próximo ao chão." },
+                    { name: "Tríceps Francês (Halter Único)", reps: "3 séries de 10-12", details: "Segure um halter com as duas mãos, leve-o atrás da cabeça e estenda os braços, mantendo os cotovelos apontados para cima." },
+                    { name: "Extensão Tríceps Overhead (Polia)", reps: "3 séries de 12-15", details: "De costas para a polia, segure a corda acima da cabeça e estenda os braços para cima, focando na contração do tríceps." }
+                ]
+            },
+            sunday: {
+                title: "Treino B': Costas & Bíceps",
+                description: "Fechamos a semana com mais um treino de costas e bíceps, utilizando exercícios diferentes para garantir um estímulo completo. A prioridade é a execução controlada para maximizar a hipertrofia e a segurança.",
+                exercises: [
+                    { name: "Puxada Alta na Polia (Triângulo)", reps: "3 séries de 10-12", details: "Sente-se na máquina e puxe o triângulo para a parte alta do peito. Mantenha a contração por um segundo no final." },
+                    { name: "Remada Unilateral com Halter", reps: "3 séries de 10-12", details: "Apoie uma mão e um joelho no banco. Mantenha a coluna reta e puxe o halter em direção ao quadril." },
+                    { name: "Puxada Frontal na Máquina Smith", reps: "3 séries de 10-12", details: "Use a barra como se fosse uma puxada alta. Incline o tronco ligeiramente para trás e puxe a barra em direção ao peito." },
+                    { name: "Rosca Scott", reps: "3 séries de 10-12", details: "Use halteres ou a máquina. Este exercício isola o bíceps, então use uma carga que você consiga controlar." },
+                    { name: "Rosca Inversa", reps: "3 séries de 12-15", details: "Segure a barra ou halteres com as palmas para baixo. Este exercício fortalece os antebraços e o músculo braquial." },
+                    { name: "Rosca Concentrada", reps: "3 séries de 10-12", details: "Sente-se, apoie o cotovelo na parte interna da coxa e concentre-se na contração máxima do bíceps." }
+                ]
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const navContainer = document.getElementById('nav-container');
+            const contentContainer = document.getElementById('main-content');
+            const workoutSectionsContainer = document.getElementById('workout-sections');
+            const accordionContainer = document.getElementById('accordion-container');
+
+            function generateWorkoutHTML() {
+                let html = '';
+                for (const day in workoutData) {
+                    const data = workoutData[day];
+                    html += `
+                        <section id="${day}" class="content-section">
+                            <div class="bg-white p-6 rounded-xl shadow-md">
+                                <h2 class="text-2xl font-bold text-sky-700 mb-2">${data.title}</h2>
+                                <p class="text-slate-600 mb-6">${data.description}</p>
+                                <div class="space-y-4">`;
+                    data.exercises.forEach((exercise, index) => {
+                        html += `
+                            <div class="border border-slate-200 rounded-lg overflow-hidden">
+                                <div class="p-4 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-semibold text-lg text-slate-800">${exercise.name}</h3>
+                                        <p class="text-slate-500">${exercise.reps}</p>
+                                    </div>
+                                    <button class="details-button text-sm font-medium text-sky-600 hover:text-sky-800" data-exercise-index="${index}">Detalhes</button>
+                                </div>
+                                <div class="details-content bg-slate-50">
+                                    <p class="p-4 text-sm text-slate-600">${exercise.details}</p>`;
+                        if (exercise.imageUrl) {
+                            html += `<img src="${exercise.imageUrl}" alt="Demonstração do exercício ${exercise.name}" class="w-full h-auto max-h-80 object-contain rounded-lg mt-2 block mx-auto">`;
+                        }
+                        html += `</div></div>`;
+                    });
+                    html += `</div></div></section>`;
+                }
+                workoutSectionsContainer.innerHTML = html;
+            }
+            
+            generateWorkoutHTML();
+
+            navContainer.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') {
+                    const targetId = e.target.dataset.target;
+
+                    navContainer.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    contentContainer.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+                    document.getElementById(targetId).classList.add('active');
+                }
+            });
+
+            workoutSectionsContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('details-button')) {
+                    const detailsContent = e.target.closest('.border').querySelector('.details-content');
+                    detailsContent.classList.toggle('open');
+                    e.target.textContent = detailsContent.classList.contains('open') ? 'Ocultar' : 'Detalhes';
+                }
+            });
+            
+            accordionContainer.addEventListener('click', function(e) {
+                const button = e.target.closest('.accordion-button');
+                if (button) {
+                    const content = button.nextElementSibling;
+                    const wasOpen = content.classList.contains('open');
+                    
+                    // Close all accordions
+                    accordionContainer.querySelectorAll('.accordion-content').forEach(item => item.classList.remove('open'));
+                    accordionContainer.querySelectorAll('.accordion-button').forEach(btn => btn.classList.remove('open'));
+
+                    // Open the clicked one if it was closed
+                    if (!wasOpen) {
+                        content.classList.add('open');
+                        button.classList.add('open');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
